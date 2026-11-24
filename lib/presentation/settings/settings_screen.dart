@@ -87,7 +87,7 @@ class SettingsScreen extends ConsumerWidget {
             items: [
               if (modules.contains('payroll'))
                 _MenuItem(
-                  Icons.payments_outlined,
+                  Icons.account_balance_wallet,
                   appText(context, 'My payslips', 'मेरी वेतन पर्ची'),
                   appText(
                     context,
@@ -98,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               if (modules.contains('tasks'))
                 _MenuItem(
-                  Icons.checklist_rounded,
+                  Icons.check_circle_outline,
                   appText(context, 'My tasks', 'मेरे काम'),
                   appText(
                     context,
@@ -109,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               if (modules.contains('field_work'))
                 _MenuItem(
-                  Icons.route_outlined,
+                  Icons.directions_walk,
                   appText(context, 'Field work', 'बाहर का काम'),
                   appText(
                     context,
@@ -170,7 +170,7 @@ class SettingsScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(13),
                       ),
                       child: const Icon(
-                        Icons.translate_rounded,
+                        Icons.language,
                         color: AppTheme.primary,
                       ),
                     ),
@@ -208,12 +208,12 @@ class SettingsScreen extends ConsumerWidget {
                     ButtonSegment(
                       value: 'en',
                       label: Text('English'),
-                      icon: Icon(Icons.language_rounded),
+                      icon: Icon(Icons.language),
                     ),
                     ButtonSegment(
                       value: 'hi',
                       label: Text('हिन्दी'),
-                      icon: Icon(Icons.translate_rounded),
+                      icon: Icon(Icons.translate),
                     ),
                   ],
                   selected: {language.isHindi ? 'hi' : 'en'},
