@@ -5,6 +5,7 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/custom_text_field.dart';
 import 'providers/auth_provider.dart';
 import 'package:mobile/core/utils/biometric_service.dart';
+import '../../config/app_language.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -27,11 +28,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text.trim(),
-          );
-      
+      await ref
+          .read(authProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text.trim());
+
       // Check state after login attempt
       final state = ref.read(authProvider);
       if (state.isAuthenticated && mounted) {
@@ -51,9 +51,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage("https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"), // Placeholder background
-            fit: BoxFit.cover,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEAF5F4), Color(0xFFF5F8FA)],
           ),
         ),
         child: Center(
@@ -66,32 +67,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Welcome Back',
+                    Image.asset(
+                      'assets/images/attendance_welcome.png',
+                      height: 148,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      appText(context, 'Welcome back', 'वापस स्वागत है'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Sign in to your account',
+                    Text(
+                      appText(
+                        context,
+                        'Sign in to your account',
+                        'अपने खाते में लॉग इन करें',
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.black54),
                     ),
                     const SizedBox(height: 32),
                     CustomTextField(
-                      label: 'Email',
+                      label: appText(context, 'Email address', 'ईमेल पता'),
                       controller: _emailController,
                       prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
-                      validator: (value) => value!.isEmpty ? 'Enter email' : null,
+                      validator: (value) => value!.isEmpty
+                          ? appText(
+                              context,
+                              'Enter your email',
+                              'अपना ईमेल लिखें',
+                            )
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
-                      label: 'Password',
+                      label: appText(context, 'Password', 'पासवर्ड'),
                       controller: _passwordController,
                       prefixIcon: Icons.lock_outline,
                       obscureText: true,
-                      validator: (value) => value!.isEmpty ? 'Enter password' : null,
+                      validator: (value) => value!.isEmpty
+                          ? appText(
+                              context,
+                              'Enter your password',
+                              'अपना पासवर्ड लिखें',
+                            )
+                          : null,
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
@@ -100,9 +126,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
-                          : const Text('Login'),
+                          : Text(appText(context, 'Log in', 'लॉग इन करें')),
                     ),
                     const SizedBox(height: 16),
                     TextButton.icon(
@@ -110,17 +139,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final bioService = BiometricService();
                         final authenticated = await bioService.authenticate();
                         if (authenticated && context.mounted) {
-                          await ref.read(authProvider.notifier).login('biometric@demo.com', '******');
-                          if (context.mounted) {
+                          await ref
+                              .read(authProvider.notifier)
+                              .checkAuthStatus();
+                          if (context.mounted &&
+                              ref.read(authProvider).isAuthenticated) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Biometric Authentication Successful!')),
+                              const SnackBar(
+                                content: Text(
+                                  'Biometric Authentication Successful!',
+                                ),
+                              ),
                             );
                             context.go('/dashboard');
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Sign in once before using fingerprint sign-in.',
+                                ),
+                              ),
+                            );
                           }
                         }
                       },
                       icon: const Icon(Icons.fingerprint),
-                      label: const Text('Login with Biometrics'),
+                      label: Text(
+                        appText(
+                          context,
+                          'Use fingerprint',
+                          'फ़िंगरप्रिंट से लॉग इन करें',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Wrap(
+                        spacing: 8,
+                        children: [
+                          TextButton(
+                            onPressed: () =>
+                                ref.read(appLanguageProvider).setLanguage('en'),
+                            child: const Text('English'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                ref.read(appLanguageProvider).setLanguage('hi'),
+                            child: const Text('हिन्दी'),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

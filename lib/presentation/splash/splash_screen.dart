@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../auth/providers/auth_provider.dart';
+import '../../config/app_language.dart';
+import '../../config/theme.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -10,7 +12,8 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
 
@@ -24,7 +27,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
     _controller.forward();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initApp();
     });
@@ -33,7 +36,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   Future<void> _initApp() async {
     // Check auth status
     await ref.read(authProvider.notifier).checkAuthStatus();
-    
+
     if (mounted) {
       final isAuthenticated = ref.read(authProvider).isAuthenticated;
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -60,7 +63,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2563EB), Color(0xFF06B6D4)],
+            colors: [AppTheme.primary, AppTheme.secondary],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -77,8 +80,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   color: Colors.white,
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'HRMS SaaS',
+                Text(
+                  appText(context, 'HRMS', 'HRMS'),
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -88,7 +91,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Enterprise HR Solution',
+                  appText(
+                    context,
+                    'Your people, work and pay in one place',
+                    'कर्मचारी, काम और वेतन—सब एक जगह',
+                  ),
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.white.withOpacity(0.8),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../widgets/glass_card.dart';
 import '../../config/theme.dart';
+import '../../config/app_language.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,7 +11,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text(appText(context, 'My profile', 'मेरी प्रोफ़ाइल')),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -22,16 +23,19 @@ class ProfileScreen extends StatelessWidget {
               child: CircleAvatar(
                 radius: 50,
                 backgroundColor: AppTheme.primary,
-                child: Text('JS', style: TextStyle(fontSize: 32, color: Colors.white)),
+                child: Text(
+                  'JS',
+                  style: TextStyle(fontSize: 32, color: Colors.white),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Yashwant Dewangan',
+            Text(
+              appText(context, 'Yashwant Dewangan', 'यशवंत देवांगन'),
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Senior Developer',
+              appText(context, 'Senior Developer', 'सीनियर डेवलपर'),
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
@@ -40,23 +44,39 @@ class ProfileScreen extends StatelessWidget {
             GlassCard(
               child: Column(
                 children: [
-                  _buildProfileItem('Employee ID', 'EMP-001'),
+                  _buildProfileItem(
+                    context,
+                    appText(context, 'Employee ID', 'कर्मचारी आईडी'),
+                    'EMP-001',
+                  ),
                   const Divider(),
-                  _buildProfileItem('Department', 'Engineering'),
+                  _buildProfileItem(
+                    context,
+                    appText(context, 'Department', 'विभाग'),
+                    appText(context, 'Engineering', 'इंजीनियरिंग'),
+                  ),
                   const Divider(),
-                  _buildProfileItem('Email', 'yashwantdewangan1234@gmail.com'),
+                  _buildProfileItem(
+                    context,
+                    appText(context, 'Email', 'ईमेल'),
+                    'yashwantdewangan1234@gmail.com',
+                  ),
                   const Divider(),
-                  _buildProfileItem('Phone', '+91 9424137362'),
+                  _buildProfileItem(
+                    context,
+                    appText(context, 'Phone', 'फ़ोन'),
+                    '+91 9424137362',
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
             // Document Vault
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Document Vault',
+                appText(context, 'My documents', 'मेरे दस्तावेज़'),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -65,28 +85,59 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.description_outlined, color: Colors.blue),
-                    title: const Text('Employment Contract'),
+                    leading: const Icon(
+                      Icons.description_outlined,
+                      color: Colors.blue,
+                    ),
+                    title: Text(
+                      appText(
+                        context,
+                        'Employment contract',
+                        'नौकरी का अनुबंध',
+                      ),
+                    ),
                     trailing: const Icon(Icons.visibility_outlined),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Opening PDF viewer...')),
+                        SnackBar(
+                          content: Text(
+                            appText(
+                              context,
+                              'Opening document…',
+                              'दस्तावेज़ खुल रहा है…',
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.upload_file, color: Colors.green),
-                    title: const Text('Upload New Document'),
+                    title: Text(
+                      appText(
+                        context,
+                        'Upload a document',
+                        'दस्तावेज़ अपलोड करें',
+                      ),
+                    ),
                     onTap: () async {
                       final result = await FilePicker.platform.pickFiles();
                       if (result != null) {
-                         // Mock Upload
-                         if (context.mounted) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Uploading ${result.files.single.name}...')),
-                           );
-                         }
+                        // Mock Upload
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                appText(
+                                  context,
+                                  'Uploading ${result.files.single.name}…',
+                                  '${result.files.single.name} अपलोड हो रहा है…',
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
@@ -99,19 +150,19 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem(String label, String value) {
+  Widget _buildProfileItem(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          Text(label, style: TextStyle(color: Colors.grey[600])),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,8 @@
 class AppConstants {
-  static const String apiBaseUrl = 'https://q0c22gpw-5000.inc1.devtunnels.ms/api'; // Android Emulator
-  // static const String apiBaseUrl = 'http://localhost:5000/api'; // iOS Simulator
+  // Use host machine LAN IP for physical device testing over Wi-Fi, configurable via dart-define
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://192.168.29.83:5000/api',
+  );
   static const String appName = 'HRMS SaaS';
 }

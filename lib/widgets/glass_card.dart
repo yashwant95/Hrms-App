@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -17,8 +16,8 @@ class GlassCard extends StatelessWidget {
     this.height,
     this.padding = const EdgeInsets.all(16),
     this.margin = EdgeInsets.zero,
-    this.borderRadius = 16,
-    this.baseColor = const Color(0xFFFFFFFF),
+    this.borderRadius = 18,
+    this.baseColor = Colors.white,
   });
 
   @override
@@ -27,42 +26,13 @@ class GlassCard extends StatelessWidget {
       width: width,
       height: height,
       margin: margin,
+      padding: padding,
       decoration: BoxDecoration(
+        color: baseColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFE1E8EC)),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: baseColor.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.5),
-                width: 1,
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  baseColor.withOpacity(0.8),
-                  baseColor.withOpacity(0.6),
-                ],
-              ),
-            ),
-            child: child,
-          ),
-        ),
-      ),
+      child: child,
     );
   }
 }

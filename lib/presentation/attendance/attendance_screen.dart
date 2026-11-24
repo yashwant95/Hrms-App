@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../widgets/glass_card.dart';
+import '../../config/app_language.dart';
 import '../../config/theme.dart';
 import 'providers/attendance_provider.dart';
 
@@ -12,55 +13,132 @@ class AttendanceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(attendanceProvider);
     final notifier = ref.read(attendanceProvider.notifier);
-    final todayStatus = state.todayStatus;
-
-    final bool isCheckedIn = todayStatus != null && todayStatus['attendance'] != null;
-    final bool isCheckedOut = isCheckedIn && todayStatus!['attendance']['checkOut'] != null;
-    
-    // Parse times
-    String checkInTime = '--:--';
-    String checkOutTime = '--:--';
-    
-    if (isCheckedIn) {
-      final ci = DateTime.parse(todayStatus!['attendance']['checkIn']).toLocal();
-      checkInTime = DateFormat('hh:mm a').format(ci);
-    }
-    
-    if (isCheckedOut) {
-      final co = DateTime.parse(todayStatus!['attendance']['checkOut']).toLocal();
-      checkOutTime = DateFormat('hh:mm a').format(co);
-    }
+    final record = state.todayStatus?['attendance'];
+    final isCheckedIn = record != null;
+    final isCheckedOut = isCheckedIn && record['checkOut'] != null;
+    final checkIn = isCheckedIn ? _formatTime(record['checkIn']) : '—';
+    final checkOut = isCheckedOut ? _formatTime(record['checkOut']) : '—';
+    final buttonLabel = isCheckedOut
+        ? appText(context, 'Attendance complete', 'आज की हाज़िरी पूरी हुई')
+        : isCheckedIn
+        ? appText(context, 'Check out', 'हाज़िरी समाप्त करें')
+        : appText(context, 'Check in now', 'अभी हाज़िरी लगाएँ');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Attendance')),
-      body: state.isLoading 
-        ? const Center(child: CircularProgressIndicator()) 
-        : Column(
-        children: [
-          // Map Placeholder (Top Half)
-          Expanded(
-            flex: 4,
-            child: Container(
-              width: double.infinity,
-              color: Colors.grey[200],
-              child: Stack(
+      appBar: AppBar(
+        title: Text(appText(context, 'Attendance', 'हाज़िरी')),
+        actions: [
+          IconButton(
+            tooltip: appText(context, 'View field work', 'बाहर के काम देखें'),
+            icon: const Icon(Icons.route_outlined),
+            onPressed: () => context.push('/field-timeline'),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: notifier.getTodayStatus,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 6, 18, 28),
+          children: [
+            Text(
+              DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
+              style: TextStyle(
+                color: Colors.blueGrey[700],
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE1E8EC)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(child: Text('Map View Placeholder')),
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
-                    child: GlassCard(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      child: Row(
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE7F3F2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: const Icon(
+                          Icons.location_on_outlined,
+                          color: AppTheme.primary,
+                          size: 27,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              appText(context, 'Work location', 'काम की जगह'),
+                              style: TextStyle(
+                                color: Colors.blueGrey[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              appText(
+                                context,
+                                'GPS location will be checked',
+                                'GPS से जगह की जाँच होगी',
+                              ),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      height: 130,
+                      color: const Color(0xFFE9F0F2),
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          const Icon(Icons.location_on, color: AppTheme.danger),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '123, Tech Park, Silicon Valley, CA',
-                              style: TextStyle(color: Colors.grey[800]),
-                              overflow: TextOverflow.ellipsis,
+                          const Icon(
+                            Icons.map_outlined,
+                            size: 58,
+                            color: Color(0xFF78909C),
+                          ),
+                          Positioned(
+                            bottom: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                appText(
+                                  context,
+                                  'Location is used to verify your check-in',
+                                  'हाज़िरी की जगह जाँचने के लिए लोकेशन उपयोग होगी',
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -70,123 +148,186 @@ class AttendanceScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
-          
-          // Action Area (Bottom Half)
-          Expanded(
-            flex: 5,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE1E8EC)),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    DateFormat('hh:mm a').format(DateTime.now()),
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                    DateFormat('h:mm').format(DateTime.now()),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   Text(
-                    DateFormat('EEEE, MMM d yyyy').format(DateTime.now()),
-                    style: const TextStyle(color: Colors.grey),
+                    DateFormat('a').format(DateTime.now()),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.blueGrey[700],
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: 32),
-                  
-                  // Punch Button
-                  GestureDetector(
-                    onTap: () {
-                      if (isCheckedOut) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           const SnackBar(content: Text('Attendance completed for today!')),
-                         );
-                         return;
-                      }
-                      if (isCheckedIn) {
-                        notifier.checkOut();
-                      } else {
-                        notifier.checkIn();
-                      }
-                    },
-                    child: Container(
-                      width: 180,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: isCheckedOut 
-                            ? [Colors.grey, Colors.blueGrey]
-                            : isCheckedIn 
-                              ? [Colors.orange, Colors.deepOrange] 
-                              : [AppTheme.primary, AppTheme.secondary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isCheckedOut ? Colors.grey : (isCheckedIn ? Colors.orange : AppTheme.primary)).withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            isCheckedOut ? Icons.check_circle : (isCheckedIn ? Icons.logout : Icons.fingerprint),
-                            size: 64, 
-                            color: Colors.white
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            isCheckedOut ? 'COMPLETED' : (isCheckedIn ? 'PUNCH OUT' : 'PUNCH IN'),
-                            style: const TextStyle(
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: state.isLoading || isCheckedOut
+                        ? null
+                        : () async {
+                            if (isCheckedIn) {
+                              await notifier.checkOut();
+                            } else {
+                              await notifier.checkIn();
+                            }
+                            if (context.mounted) {
+                              final updated = ref.read(attendanceProvider);
+                              if (updated.error != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(updated.error!)),
+                                );
+                              }
+                            }
+                          },
+                    icon: state.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
                               color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
                             ),
+                          )
+                        : Icon(
+                            isCheckedOut
+                                ? Icons.check_circle_outline
+                                : isCheckedIn
+                                ? Icons.logout_rounded
+                                : Icons.fingerprint_rounded,
+                            size: 24,
                           ),
-                        ],
+                    label: Text(buttonLabel),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(60),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  
-                  const SizedBox(height: 32),
+                  if (state.error != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      appText(
+                        context,
+                        'We could not update attendance. Please try again.',
+                        'हाज़िरी अपडेट नहीं हो सकी। कृपया फिर कोशिश करें।',
+                      ),
+                      style: const TextStyle(color: AppTheme.danger),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: 18),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        children: [
-                          const Icon(Icons.access_time, color: Colors.grey),
-                          const SizedBox(height: 4),
-                          Text(checkInTime, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const Text('Check In', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        ],
+                      Expanded(
+                        child: _TimeTile(
+                          label: appText(context, 'Checked in', 'हाज़िरी लगी'),
+                          time: checkIn,
+                          icon: Icons.login_rounded,
+                        ),
                       ),
-                      Column(
-                        children: [
-                          const Icon(Icons.access_time_filled, color: Colors.grey),
-                          const SizedBox(height: 4),
-                          Text(checkOutTime, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const Text('Check Out', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        ],
-                      ),
-                      const Column(
-                        children: [
-                          Icon(Icons.timer, color: Colors.grey),
-                          SizedBox(height: 4),
-                          Text('00h 00m', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Working Hrs', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _TimeTile(
+                          label: appText(
+                            context,
+                            'Checked out',
+                            'हाज़िरी समाप्त',
+                          ),
+                          time: checkOut,
+                          icon: Icons.logout_rounded,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 14),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/field-timeline'),
+              icon: const Icon(Icons.route_outlined),
+              label: Text(
+                appText(
+                  context,
+                  'View my field work',
+                  'बाहर के काम की जानकारी',
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(54),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _formatTime(dynamic value) {
+    try {
+      return DateFormat(
+        'h:mm a',
+      ).format(DateTime.parse(value.toString()).toLocal());
+    } catch (_) {
+      return '—';
+    }
+  }
+}
+
+class _TimeTile extends StatelessWidget {
+  final String label;
+  final String time;
+  final IconData icon;
+  const _TimeTile({
+    required this.label,
+    required this.time,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.background,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppTheme.primary, size: 21),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(color: Colors.blueGrey[700], fontSize: 14),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            time,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
           ),
         ],
       ),
