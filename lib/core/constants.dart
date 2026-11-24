@@ -1,8 +1,8 @@
 class AppConstants {
-  // Live Production Server API URL
+  // Live Production Server API URL (Domain with SSL)
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://89.116.34.222:5007/api',
+    defaultValue: 'https://hrmsbackend.fanya.tech/api',
   );
   static const String appName = 'HRMS SaaS';
 }
